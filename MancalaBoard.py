@@ -57,13 +57,12 @@ class MancalaBoard:
                 moves += [m+1]
         return moves
 
-    def boardScore( self, player ):
+    def boardScore( self, player_num ):
         """Evaluates optimality of board for player # player_num"""
-        player_num = player.num
         if player_num == 1:
-            return self.scoreCups[0] - self.scoreCups[1]
+            return self.scoreCups[0]
         else:
-            return self.scoreCups[1] - self.scoreCups[0]
+            return self.scoreCups[1]
 
 
     def makeMove( self, player, cup ):
