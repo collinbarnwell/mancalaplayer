@@ -127,35 +127,34 @@ class Player:
     # However, for your custom player, you may copy this function
     # and modify it so that it uses a different termination condition
     # and/or a different move search order.
- def alphaBetaMove(self, board, ply):
-        """ Choose a move with alpha beta pruning.  Returns (score, move) """
-        print "Alpha Beta Move not yet implemented"
-        move = -1
-        alpha= -INFINITY
-        beta= INFINITY
-        array=[alpha, beta]
-        score = -INFINITY
-        turn = self
-        for m in board.legalMoves(self):
-            #for each legal move
-            if ply == 0:
-                #if we're at ply 0, we need to call our eval function & return
-                return (self.score(board), m)
-            if board.gameOver():
-                return (-1, -1)  # Can't make a move, the game is over
-            nb = deepcopy(board)
-            #make a new board
-            nb.makeMove(self, m)
-            #try the move
-            opp = Player(self.opp, self.type, self.ply)
-            s = opp.abminValue(nb, ply-1, turn, array)
-            #and see what the opponent would do next
-            if s > score:
-                #if the result is better than our best score so far, save that move,score
-                move = m
-                score = s
-        #return the best score and move so far
-        return score, move
+    def alphaBetaMove(self, board, ply):
+            """ Choose a move with alpha beta pruning.  Returns (score, move) """
+            move = -1
+            alpha= -INFINITY
+            beta= INFINITY
+            array=[alpha, beta]
+            score = -INFINITY
+            turn = self
+            for m in board.legalMoves(self):
+                #for each legal move
+                if ply == 0:
+                    #if we're at ply 0, we need to call our eval function & return
+                    return (self.score(board), m)
+                if board.gameOver():
+                    return (-1, -1)  # Can't make a move, the game is over
+                nb = deepcopy(board)
+                #make a new board
+                nb.makeMove(self, m)
+                #try the move
+                opp = Player(self.opp, self.type, self.ply)
+                s = opp.abminValue(nb, ply-1, turn, array)
+                #and see what the opponent would do next
+                if s > score:
+                    #if the result is better than our best score so far, save that move,score
+                    move = m
+                    score = s
+            #return the best score and move so far
+            return score, move
 
     def abmaxValue(self, board, ply, turn, array):
         """ Find the minimax value for the next move for this player
@@ -211,8 +210,6 @@ class Player:
                 array[1]=score
         return score
 
-        
-                
     def chooseMove(self, board):
         """ Returns the next move that this player wants to make """
         if self.type == self.HUMAN:
@@ -268,6 +265,6 @@ class MancalaPlayer(Player):
             k=k+100
         if board.hasWon(self.num):
             k=k+100.0
-        if board.hasWon(self.opp) or board.boardScore(opp.num)>48:
+        if board.hasWon(self.opp) or board.boardScore(self.opp)>48:
             k=0.0
         return k

@@ -64,7 +64,6 @@ class MancalaBoard:
         else:
             return self.scoreCups[1]
 
-
     def makeMove( self, player, cup ):
         again = self.makeMoveHelp(player, cup)
         if self.gameOver():
