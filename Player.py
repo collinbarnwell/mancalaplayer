@@ -231,22 +231,43 @@ class Player:
             print "chose move", move, " with value", val
             return move
         elif self.type == self.CUSTOM:
-            # TODO: Implement a custom player
-            # You should fill this in with a call to your best move choosing
-            # function.  You may use whatever search algorithm and scoring
-            # algorithm you like.  Remember that your player must make
-            # each move in about 10 seconds or less.
-            print "Custom player not yet implemented"
-            return -1
+            val, move = self.alphaBetaMove(board, self.ply)
+            val, move = self.compareToExtra(board, val, move)
+            print "chose move", move, " with value", val
+            return move
         else:
             print "Unknown player type"
             return -1
 
 
 # Note, you should change the name of this player to be your netid
-class MancalaPlayer(Player):
+class crb331(Player):
     """ Defines a player that knows how to evaluate a Mancala gameboard
         intelligently """
+
+    def compareToExtra(self, board, originalVal, originalMove):
+        """Evaluates potential of moves that will earn an extra move"""
+        # look at possible moves that will earn an extra turn
+        # evaluate board from each of those, add 2 to val
+        cups = board.getPlayersCups(self)
+        bestMove = originalMove
+        bestVal = originalVal
+
+        for m in board.legalMoves(self):
+            if m != cups[m - 1]:
+                continue
+
+            nextBoard = deepcopy(board)
+            nextBoard.makeMove(self, m)
+
+            # check how well taking extra move sets you up (+2 for extra open space and mancala + 1)
+            newVal, x = self.alphaBetaMove(nextBoard, self.ply)
+            if newVal + 2 >= bestVal:
+                print "we found somethin good!"
+                bestVal = newVal + 2
+                bestMove = m
+
+        return (bestVal, bestMove)
 
     def score(self, board):
         """ Evaluate the Mancala board for this player """
