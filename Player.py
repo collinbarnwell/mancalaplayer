@@ -222,7 +222,10 @@ class Player:
             print "chose move", move, " with value", val
             return move
         elif self.type == self.CUSTOM:
-            val, move = self.minimaxMove(board, self.ply)
+            # val, move = self.minimaxMove(board, self.ply)
+            # Made ply always 7
+            val, move = self.alphaBetaMove(board, 7)
+            val, move = self.compareToExtra(board, val, move)
             print "chose move", move, " with value", val
             return move
         else:
@@ -243,15 +246,19 @@ class crb331(Player):
         bestMove = originalMove
         bestVal = originalVal
 
+        print cups
+
         for m in board.legalMoves(self):
-            if 7 - m != cups[6 - m]:
+            if 7 - m != cups[m-1]:
                 continue
+
+            print "o"
 
             nextBoard = deepcopy(board)
             nextBoard.makeMove(self, m)
 
             # check how well taking extra move sets you up (+2 for extra open space and mancala + 1)
-            newVal, x = self.alphaBetaMove(nextBoard, self.ply)
+            newVal, x = self.alphaBetaMove(nextBoard, 2)
             if newVal + 2 >= bestVal:
                 print "we found somethin good!"
                 bestVal = newVal + 2
@@ -261,10 +268,7 @@ class crb331(Player):
 
     def score(self, board, mTurn):
         """ Evaluate the Mancala board for this player """
-        # Currently this function just calls Player's score
-        # function.  You should replace the line below with your own code
-        # for evaluating the board
-        print "Calling score in MancalaPlayer"
+        # print "Calling score in MancalaPlayer"
         #return board.boardScore( self.num )
         k=0
         # if you have an empty cup and the opponent's corresponding cup is not empty,
