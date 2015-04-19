@@ -44,7 +44,7 @@ class Player:
             #for each legal move
             if ply == 0:
                 #if we're at ply 0, we need to call our eval function & return
-                return (self.score(board), m)
+                return (self.score(board, "max"), m)
             if board.gameOver():
                 return (-1, -1)  # Can't make a move, the game is over
             nb = deepcopy(board)
@@ -65,12 +65,12 @@ class Player:
         """ Find the minimax value for the next move for this player
         at a given board configuation. Returns score."""
         if board.gameOver():
-            return turn.score(board)
+            return turn.score(board, "max")
         score = -INFINITY
         for m in board.legalMoves(self):
             if ply == 0:
                 #print "turn.score(board) in max value is: " + str(turn.score(board))
-                return turn.score(board)
+                return turn.score(board, "max")
             # make a new player to play the other side
             opponent = Player(self.opp, self.type, self.ply)
             # Copy the board so that we don't ruin it
@@ -86,12 +86,12 @@ class Player:
         """ Find the minimax value for the next move for this player
             at a given board configuation. Returns score."""
         if board.gameOver():
-            return turn.score(board)
+            return turn.score(board, "min")
         score = INFINITY
         for m in board.legalMoves(self):
             if ply == 0:
                 #print "turn.score(board) in min Value is: " + str(turn.score(board))
-                return turn.score(board)
+                return turn.score(board, "min")
             # make a new player to play the other side
             opponent = Player(self.opp, self.type, self.ply)
             # Copy the board so that we don't ruin it
@@ -107,7 +107,7 @@ class Player:
     # The default player defines a very simple score function
     # You will write the score function in the MancalaPlayer below
     # to improve on this function.
-    def score(self, board):
+    def score(self, board, mValue):
         """ Returns the score for this player given the state of the board """
         if board.hasWon(self.num):
             return 100.0
@@ -130,84 +130,75 @@ class Player:
     def alphaBetaMove(self, board, ply):
             """ Choose a move with alpha beta pruning.  Returns (score, move) """
             move = -1
-            alpha= -INFINITY
-            beta= INFINITY
-            array=[alpha, beta]
+            array1=[-INFINITY, INFINITY]#holds alpha and beta
             score = -INFINITY
             turn = self
             for m in board.legalMoves(self):
-                #for each legal move
+
                 if ply == 0:
-                    #if we're at ply 0, we need to call our eval function & return
-                    return (self.score(board), m)
+                    return (self.score(board, "max"), m)
                 if board.gameOver():
                     return (-1, -1)  # Can't make a move, the game is over
                 nb = deepcopy(board)
-                #make a new board
+
                 nb.makeMove(self, m)
-                #try the move
+
                 opp = Player(self.opp, self.type, self.ply)
-                s = opp.abminValue(nb, ply-1, turn, array)
-                #and see what the opponent would do next
+                s = opp.abminValue(nb, ply-1, turn, array1)
+
                 if s > score:
-                    #if the result is better than our best score so far, save that move,score
+
                     move = m
                     score = s
-            #return the best score and move so far
+
             return score, move
 
     def abmaxValue(self, board, ply, turn, array):
         """ Find the minimax value for the next move for this player
         at a given board configuation. Returns score."""
+        array2=[array[0],array[1]]
         if board.gameOver():
-            return turn.score(board)
+            return turn.score(board, "max")
         score = -INFINITY
         for m in board.legalMoves(self):
             if ply == 0:
-                #print "turn.score(board) in max value is: " + str(turn.score(board))
-                return turn.score(board)
-            # make a new player to play the other side
+
+                return turn.score(board, "max")
+
             opponent = Player(self.opp, self.type, self.ply)
-            # Copy the board so that we don't ruin it
+
             nextBoard = deepcopy(board)
             nextBoard.makeMove(self, m)
             s = opponent.abminValue(nextBoard, ply-1, turn, array)
-
-            #print "s in maxValue is: " + str(s)
-            
             if s > score:
                 score = s
-            if score >= array[1]:
+            if score >= array2[1]:
                 return score
-
-            if array[0]<score:
-                array[0]=score
+            if array2[0]<score:
+                array2[0]=score
         return score
 
     def abminValue(self, board, ply, turn, array):
         """ Find the minimax value for the next move for this player
             at a given board configuation. Returns score."""
+        array2=[array[0],array[1]]
         if board.gameOver():
-            return turn.score(board)
+            return turn.score(board, "min")
         score = INFINITY
         for m in board.legalMoves(self):
             if ply == 0:
-                #print "turn.score(board) in min Value is: " + str(turn.score(board))
-                return turn.score(board)
-            # make a new player to play the other side
+                return turn.score(board, "min")
             opponent = Player(self.opp, self.type, self.ply)
-            # Copy the board so that we don't ruin it
             nextBoard = deepcopy(board)
             nextBoard.makeMove(self, m)
             s = opponent.abmaxValue(nextBoard, ply-1, turn, array)
 
-            #print "s in minValue is: " + str(s)
             if s < score:
                 score = s
-            if score <= array[0]:
+            if score <= array2[0]:
                 return score
-            if array[1]>score:
-                array[1]=score
+            if array2[1]>score:
+                array2[1]=score
         return score
 
     def chooseMove(self, board):
@@ -231,8 +222,7 @@ class Player:
             print "chose move", move, " with value", val
             return move
         elif self.type == self.CUSTOM:
-            val, move = self.alphaBetaMove(board, self.ply)
-            val, move = self.compareToExtra(board, val, move)
+            val, move = self.minimaxMove(board, self.ply)
             print "chose move", move, " with value", val
             return move
         else:
@@ -254,7 +244,7 @@ class crb331(Player):
         bestVal = originalVal
 
         for m in board.legalMoves(self):
-            if m != cups[m - 1]:
+            if 7 - m != cups[6 - m]:
                 continue
 
             nextBoard = deepcopy(board)
@@ -269,7 +259,7 @@ class crb331(Player):
 
         return (bestVal, bestMove)
 
-    def score(self, board):
+    def score(self, board, mTurn):
         """ Evaluate the Mancala board for this player """
         # Currently this function just calls Player's score
         # function.  You should replace the line below with your own code
@@ -277,15 +267,32 @@ class crb331(Player):
         print "Calling score in MancalaPlayer"
         #return board.boardScore( self.num )
         k=0
-        for x in range(0,6):
-            if board.getPlayersCups(self.num)[x]==0 and board.getPlayersCups(self.opp)!=0:
-                k=k+1
-            if board.getPlayersCups(self.num)[x]+x==5:#extra move might be there
-                k=k+1
+        # if you have an empty cup and the opponent's corresponding cup is not empty,
+        # check to see if you can end in that cup to steal their stone if it's your turn.
+        # Do the corresponding thing if it's their turn.
+        if(mTurn == "min"):
+            for x in range(0,6):
+                if  board.getPlayersCups(self.num)[x]==0 and board.getPlayersCups(self.opp)[5-x] !=0:
+                    for y in range(0,x):
+                     if board.getPlayersCups(self.num)[y]+ y == x:
+                        k += board.getPlayersCups(self.opp)[5-x] + 1
+        else:
+            for x in range(0,6):
+                if  board.getPlayersCups(self.opp)[x]==0 and board.getPlayersCups(self.num)[5-x] !=0:
+                    for y in range(0,x):
+                     if board.getPlayersCups(self.opp)[y]+ y == x:
+                        k -= board.getPlayersCups(self.num)[5-x] + 1
+        
+            
+        
+##        if board.getPlayersCups(self.num)[x]+x==5:#extra move might be there
+##            k=k+1
+        k += (board.boardScore(self.num) - board.boardScore(self.opp))
         if board.boardScore(self.num)>24:#changed board score
-            k=k+100
+            k+= 1000.0
         if board.hasWon(self.num):
-            k=k+100.0
-        if board.hasWon(self.opp) or board.boardScore(self.opp)>48:
+            k+= 1000.0
+        if board.hasWon(self.opp) or board.boardScore(self.opp)>24:
             k=0.0
         return k
+
